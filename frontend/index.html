@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Feedback System</title>
+    <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav>
+        <ul>
+            <li><a href="#" onclick="loadPage('home')">Home</a></li>
+            <li><a href="#" onclick="loadPage('login')">Login</a></li>
+            <li><a href="#" onclick="loadPage('signup')">Signup</a></li>
+            <li><a href="#" onclick="loadPage('feedback')">Give Feedback</a></li>
+            <li><a href="#" onclick="loadPage('analysis')">Analyze Feedback</a></li>
+        </ul>
+    </nav>
+
+    <!-- Content Section -->
+    <div id="content">
+        <h1>Welcome to the Student Feedback System</h1>
+        <p>Select an option from the navigation menu.</p>
+    </div>
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <script src="static/script.js"></script>
+</body>
+</html>
