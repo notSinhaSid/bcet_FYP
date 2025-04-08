@@ -7,20 +7,20 @@ def get_db_connection(db_path):
     return conn
 
 # Fetch user by username
-def get_user(username):
+def get_user(email):
     conn = get_db_connection(USER_DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
-    user = cursor.fetchone()
+    cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+    email = cursor.fetchone()
     conn.close()
-    return user
+    return email
 
 # Add new user
-def add_user(username, password):
+def add_user(username, email, password):
     conn = get_db_connection(USER_DB_PATH)
     cursor = conn.cursor()
     try:
-        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        cursor.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", (username, email, password))
         conn.commit()
         return True
     except sqlite3.IntegrityError:

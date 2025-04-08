@@ -9,13 +9,13 @@
 <body>
 
     <!-- Navbar -->
-    <nav>
+    <nav id="navbar">
         <ul>
-            <li><a href="#" onclick="loadPage('home')">Home</a></li>
-            <li><a href="#" onclick="loadPage('login')">Login</a></li>
-            <li><a href="#" onclick="loadPage('signup')">Signup</a></li>
-            <li><a href="#" onclick="loadPage('feedback')">Give Feedback</a></li>
-            <li><a href="#" onclick="loadPage('analysis')">Analyze Feedback</a></li>
+            <li><a href="index.html" onclick="loadPage('home')">Home</a></li>
+            <li><a href="index.html?page=login" onclick="loadPage('login')">Login</a></li>
+            <li><a href="index.html?page=signup" onclick="loadPage('signup')">Signup</a></li>
+            <li><a href="index.html?page=feedback" id="feedback-link" onclick="loadPage('feedback')">Give Feedback</a></li>
+            <li><a href="index.html?page=analysis" onclick="loadPage('analysis')">Analyze Feedback</a></li>
         </ul>
     </nav>
 

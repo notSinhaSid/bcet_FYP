@@ -1,8 +1,13 @@
 // Function to load different pages dynamically
 function loadPage(page) {
-    let content = document.getElementById("content");
+    const content = document.getElementById("content");
+    const navbar = document.getElementById("navbar");
+    const token = localStorage.getItem("token");
+
+
 
     if (page === "home") {
+
         content.innerHTML = `
             <h1>Welcome to the Student Feedback System</h1>
             <p>Select an option from the navigation menu.</p>
@@ -12,7 +17,7 @@ function loadPage(page) {
         content.innerHTML = `
             <h2>Login</h2>
             <form id="login-form">
-                <input type="text" id="login-username" placeholder="Username" required>
+                <input type="email" id="login-email" placeholder="Email" required>
                 <input type="password" id="login-password" placeholder="Password" required>
                 <button type="submit">Login</button>
             </form>
@@ -20,75 +25,52 @@ function loadPage(page) {
         `;
 
         document.getElementById("login-form").addEventListener("submit", loginUser);
+    }
+    else if (page === "signup") {
+        content.innerHTML = `
+            <h2>Signup</h2>
+            <form id="signup-form">
+                <input type="text" id="signup-name" placeholder="Full Name" required>
+                <input type="email" id="signup-email" placeholder="Email" required>
+                <input type="password" id="signup-password" placeholder="Password" required>
+                <button type="submit">Signup</button>
+            </form>
+            <p>Already have an account? <a href="#" onclick="loadPage('login')">Login</a></p>
+        `;
+
+        document.getElementById("signup-form").addEventListener("submit", signupUser);
     } 
     else if (page === "feedback") {
-        if (!localStorage.getItem("token")) {
-            content.innerHTML = `<h2>You must <a href="#" onclick="loadPage('login')">Login</a> to give feedback.</h2>`;
+        if (!token) {
+            // content.innerHTML = `<h2>You must <a href="#" onclick="loadPage('login')">Login</a> to give feedback.</h2>`;
+            alert("You must be logged in to give feedback.");
+            loadPage("login"); // Redirect to login page
             return;
         }
         content.innerHTML = `
             <h2>Give Feedback</h2>
             <label for="college">Select College:</label>
             <select id="college">
-                <option value="college1">College 1</option>
-                <option value="college2">College 2</option>
+                <option value="College_1">College 1</option>
+                <option value="College_2">College 2</option>
             </select>
-            <div id="questions"></div>
+            <button id="nextButton" onclick="loadFeedbackQuestions()">Select</button>
+            <div id="feedback-form"></div>
         `;
+        const collegeDropdown = document.getElementById("college");
+        const nextButton = document.getElementById("nextButton");
+        const feedbackForm = document.getElementById("feedback-form");
 
-        loadFeedbackQuestions();
-    } 
-    // else if (page === "feedback") {
-    //     if (!localStorage.getItem("token")) {
-    //         content.innerHTML = `<h2>You must <a href="#" onclick="loadPage('login')">Login</a> to give feedback.</h2>`;
-    //         return;
-    //     }
-    //     let username = localStorage.getItem("username");
-    //     content.innerHTML = `
-    //     <h2>Give Feedback</h2>
-    //     <p id="submission-status"></p>
-    //     <div id="feedback-form">
-    //         <label for="feedback-college">Select College:</label>
-    //         <select id="feedback-college">
-    //             <option value="college1">College_1</option>
-    //             <option value="college2">College_2</option>
-    //         </select>
-    //         <textarea id="feedback-text" placeholder="Enter your feedback..."></textarea>
-    //         <button id="submit-feedback">Submit Feedback</button>
-    //     </div>
-    //     `;
+        // Hide Next button when clicked
+        nextButton.addEventListener("click", function () {
+            nextButton.style.display = "none";
+        });
 
-    // // Fetch submission status
-    // fetch(`http://127.0.0.1:5000/check_submission/${username}`)
-    //     .then(response => response.json())
-    //     .then(data => {
-    //         if (data.submitted) {
-    //             document.getElementById("submission-status").innerHTML = `
-    //                 <b>You have already submitted feedback for ${data.college}. You cannot submit again.</b>
-    //             `;
-    //             document.getElementById("feedback-form").style.display = "none"; // Hide form
-    //         } else {
-    //             document.getElementById("submit-feedback").addEventListener("click", submitFeedback);
-    //         }
-    //     })
-    //     .catch(error => console.error("Error checking submission:", error));
-    // }
-    else if (page === "feedback") {
-        if (!localStorage.getItem("token")) {
-            content.innerHTML = `<h2>You must <a href="#" onclick="loadPage('login')">Login</a> to give feedback.</h2>`;
-            return;
-        }
-        content.innerHTML = `
-            <h2>Give Feedback</h2>
-            <label for="college">Select College:</label>
-            <select id="college">
-                <option value="college1">College 1</option>
-                <option value="college2">College 2</option>
-            </select>
-            <div id="questions"></div>
-        `;
-
-        loadFeedbackQuestions();
+    // Reset feedback questions and show Next button when college changes
+        collegeDropdown.addEventListener("change", function () {
+            nextButton.style.display = "block";
+            feedbackForm.innerHTML = "";  // Clear any previous questions
+        });
     } 
     else if (page === "analysis") {
         content.innerHTML = `
@@ -103,44 +85,57 @@ function loadPage(page) {
             <div id="analysis-result"></div>
             <div id="charts"></div>
         `;
-        // document.getElementById("college").addEventListener("change", fetchAnalysis);
-        // fetchAnalysis()
     }
 }
 
-// Function to handle user signup
+function logoutUser() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("tokenExpiry");
+    localStorage.removeItem("email");
+    alert("Logged out successfully!");
+    updateNavbar();  // Refresh navbar after logout
+    loadPage("login"); // Redirect to login
+}
+
 async function signupUser(event) {
     event.preventDefault();
-
     const name = document.getElementById("signup-name").value;
     const email = document.getElementById("signup-email").value;
     const password = document.getElementById("signup-password").value;
-
-    const response = await fetch("http://127.0.0.1:5000/signup", {
+    
+    fetch("http://127.0.0.1:5000/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password })
-    });
-
-    const data = await response.json();
-    alert(data.message);
-
-    if (response.ok) {
-        loadPage('login');  // Redirect to login
-    }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.Success) {
+            alert("Signup successful! You are now logged in.");
+            localStorage.setItem("token", data.token); // Store token like in login
+            const expiryTime = Date.now() + 1 * 60 * 60 * 1000;
+            localStorage.setItem("tokenExpiry", expiryTime);
+            localStorage.setItem("email",email)
+            updateNavbar();
+            loadPage("home"); // Redirect to home page
+        } else {
+            alert("Signup failed: " + data.message);
+        }
+    })
+    .catch(error => console.error("Signup error:", error));
 }
 
 // Function to handle user login
 async function loginUser(event) {
     event.preventDefault();
 
-    const username = document.getElementById("login-username").value;
+    const email = document.getElementById("login-email").value;
     const password = document.getElementById("login-password").value;
 
     const response = await fetch("http://127.0.0.1:5000/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ email, password })
     });
 
     const data = await response.json();
@@ -148,13 +143,17 @@ async function loginUser(event) {
 
     if (response.ok) {
         localStorage.setItem("token", data.token); // Store JWT Token
+        localStorage.setItem("email", email);
+        const expiryTime = Date.now() + 1 * 60 * 60 * 1000;
+        localStorage.setItem("tokenExpiry", expiryTime);
+        updateNavbar();
         loadPage('home');  // Redirect after login
     }
 }
 
 // Function to load feedback questions dynamically
 function loadFeedbackQuestions() {
-    let questionsContainer = document.getElementById("questions");
+    let questionsContainer = document.getElementById("feedback-form");
     questionsContainer.innerHTML = ""; // Clear previous questions
 
     let questions = [
@@ -187,11 +186,30 @@ function loadFeedbackQuestions() {
 
 // Function to submit feedback
 async function submitFeedback() {
-    const username = localStorage.getItem("username");  // Assuming user is stored in localStorage
-    const college = document.getElementById("feedback-college").value;
-    const feedback = document.getElementById("feedback-text").value;
+    const email = localStorage.getItem("email");  // Assuming user is stored in localStorage
+    const college = document.getElementById("college").value;
+    // const feedback = document.getElementById("feedback-form").values;
+    const feedbackTextareas = document.querySelectorAll("#feedback-form textarea");
+    const feedback = [];
+    
+    let allAnswered=true;
 
-    if (!college || !feedback) {
+    feedbackTextareas.forEach((textarea, index) => {
+        const question = textarea.previousElementSibling.innerText;
+        const answer = textarea.value.trim();
+
+        if(!answer){
+            allAnswered = false;
+            textarea.style.border = "2px solid red";
+        } else {
+            textarea.style.border = "";
+        }
+
+        feedback.push({ question: question, answer: answer});
+    });
+
+
+    if (!college || !allAnswered) {
         alert("Please enter your feedback and select a college.");
         return;
     }
@@ -199,7 +217,7 @@ async function submitFeedback() {
     const response = await fetch("http://127.0.0.1:5000/submit_feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, college, feedback }),
+        body: JSON.stringify({ email, college, feedback }),
     });
 
     const data = await response.json();
@@ -287,9 +305,70 @@ function generateCharts(positive, neutral, negative) {
     Plotly.newPlot(pieDiv, [pieTrace], { title: "Sentiment Breakdown" });
 }
 
+function updateNavbar() {
+    const navbar = document.getElementById("navbar");
+    const token = localStorage.getItem("token");
+
+    if (navbar) {
+        let navContent = `
+            <ul>
+                <li><a href="index.html" onclick="loadPage('home')">Home</a></li>
+        `;
+
+        if (token) {
+            // If logged in, show "Give Feedback", "Analyze Feedback", and "Logout"
+            navContent += `
+                <li><a href="index.html?page=feedback" id="feedback-link" onclick="loadPage('feedback')">Give Feedback</a></li>
+                <li><a href="index.html?page=analysis" onclick="loadPage('analysis')">Analyze Feedback</a></li>
+                <li><a href="#" id="logoutButton" onclick="logoutUser()">Logout</a></li>
+            `;
+        } else {
+            // If not logged in, show Login and Signup
+            navContent += `
+                <li><a href="index.html?page=login" onclick="loadPage('login')">Login</a></li>
+                <li><a href="index.html?page=signup" onclick="loadPage('signup')">Signup</a></li>
+            `;
+        }
+
+        navContent += `</ul>`;
+        navbar.innerHTML = navContent;
+    }
+}
+
+function updateUIAfterLogin() {
+    const token = localStorage.getItem("authToken");
+    const navbar = document.getElementById("navbar");
+
+    if (token) {
+        // Hide login and signup links
+        document.querySelector("a[href*='login']").style.display = "none";
+        document.querySelector("a[href*='signup']").style.display = "none";
+
+        // Show logout button if not already added
+        if (!document.getElementById("logoutButton")) {
+            const logoutLink = document.createElement("li");
+            logoutLink.innerHTML = `<a href="#" id="logoutButton" style="color:white">Logout</a>`;
+            logoutLink.addEventListener("click", logoutUser);
+            navbar.appendChild(logoutLink);
+        }
+    }
+}
+
 // Load the correct page on startup
 document.addEventListener("DOMContentLoaded", () => {
     const urlParams = new URLSearchParams(window.location.search);
     const page = urlParams.get("page") || "home";
+    updateNavbar();
     loadPage(page);
 });
+
+function checkTokenValidity() {
+    const token = localStorage.getItem("token");
+    const expiryTime = localStorage.getItem("tokenExpiry");
+
+    if (!token || !expiryTime || Date.now() > expiryTime) {
+        logoutUser(); // Auto-logout if token expired
+    }
+}
+
+setInterval(checkTokenValidity, 3600000);

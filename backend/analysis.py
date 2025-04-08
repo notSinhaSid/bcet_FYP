@@ -90,7 +90,7 @@ def analyze_feedback(college_name):
         # summary=content
         st=content.find("Answer:")
         # end=content.find("")
-        summary=content[st+7:len(content)-1]
+        summary=content[st+7:len(content)]
 
 
         return jsonify({"sentiment_counts": sentiment_counts, "summary": summary}), 200

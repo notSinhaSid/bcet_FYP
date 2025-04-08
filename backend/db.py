@@ -1,6 +1,6 @@
 import os
 import sqlite3
-from config import USER_DB_PATH, FEEDBACK_DB_PATH
+from config import USER_DB_PATH, FEEDBACK_DB_PATH, FEEDBACK_TRACKING_DB_PATH
 
 # Ensure the db/ directory exists before creating the databases
 os.makedirs(os.path.dirname(USER_DB_PATH), exist_ok=True)
@@ -10,7 +10,8 @@ def init_users_db():
     cursor = conn.cursor()
     cursor.execute('''CREATE TABLE IF NOT EXISTS users (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        username TEXT UNIQUE NOT NULL,
+                        username TEXT NOT NULL,
+                        email VARCHAR(255) UNIQUE NOT NULL,
                         password TEXT NOT NULL)''')
     conn.commit()
     conn.close()
@@ -24,9 +25,18 @@ def init_feedback_db():
     conn.commit()
     conn.close()
 
+# def init_tracking_db():
+#     conn = sqlite3.connect(FEEDBACK_TRACKING_DB_PATH)
+#     cursor = conn.cursor()
+#     cursor.execute('''CREATE TABLE IF NOT EXISTS user_feedback_tracking (
+#                         email VARCHAR(255) UNIQUE  )''')
+#     conn.commit()
+#     conn.close()
+
 def init_db():
     init_users_db()
     init_feedback_db()
+    # init_tracking_db()
 
 if __name__ == "__main__":
     init_db()
