@@ -7,3 +7,4 @@ datasette
 textblob
 bcrypt
 pandas
+ollama
