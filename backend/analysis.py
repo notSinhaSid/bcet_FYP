@@ -8,10 +8,14 @@ analysis = Blueprint('analysis', __name__)
 
 # Function to analyze multiple feedbacks in one Ollama call
 def batch_analyze_sentiments(feedback_list):
+    
+    # Create the prompt for the model
     prompt = "Classify the sentiment (Positive, Negative, Neutral) for each feedback:\n\n"
     for i, feedback in enumerate(feedback_list):
         prompt += f"{i+1}. {feedback}\n"
 
+    # Call the Ollama model with the prompt
+    # Using the deepseek-r1:7b model for sentiment analysis
     response = ollama.chat(model="deepseek-r1:7b", messages=[{"role": "user", "content": prompt}])
     sentiment_results = response["message"]["content"].strip().split("\n")
 
@@ -26,6 +30,7 @@ def batch_analyze_sentiments(feedback_list):
 
     return sentiments
 
+# Route to analyze feedback for a specific college
 @analysis.route('/analyze_feedback/<college_name>', methods=['GET'])
 def analyze_feedback(college_name):
     try:
